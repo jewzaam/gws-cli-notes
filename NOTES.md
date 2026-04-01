@@ -1,5 +1,9 @@
 # GWS CLI Notes
 
+## GCP Project Setup
+
+Create a new GCP project (e.g., under "Default Projects" in the org). Do not reuse an existing project. Then run `gws auth setup` which walks through OAuth consent screen and client credential creation. APIs are enabled on-demand (first call to a service prompts with an enablement URL).
+
 ## Authentication
 
 ```bash
