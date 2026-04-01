@@ -17,4 +17,4 @@ A collection of usage notes, patterns, and gotchas discovered while working with
 
 ## Usage
 
-See [NOTES.md](NOTES.md) for all notes.
+[NOTES.md](NOTES.md) is the primary artifact — structured for AI assistant consumption (e.g., referenced from CLAUDE.md) so that tools like Claude Code can use `gws` commands effectively without rediscovering API quirks, scope requirements, and response structure.
