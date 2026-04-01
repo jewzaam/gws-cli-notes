@@ -1,6 +1,6 @@
 # gws-cli-notes
 
-[![Markdown Lint](https://github.com/jewzaam/gws-cli-notes/workflows/Markdown%20Lint/badge.svg)](https://github.com/jewzaam/gws-cli-notes/actions/workflows/markdown-lint.yml) [![Links](https://github.com/jewzaam/gws-cli-notes/workflows/Links/badge.svg)](https://github.com/jewzaam/gws-cli-notes/actions/workflows/links.yml)
+[![Markdown Lint](https://github.com/jewzaam/gws-cli-notes/actions/workflows/markdown-lint.yml/badge.svg)](https://github.com/jewzaam/gws-cli-notes/actions/workflows/markdown-lint.yml) [![Links](https://github.com/jewzaam/gws-cli-notes/actions/workflows/links.yml/badge.svg)](https://github.com/jewzaam/gws-cli-notes/actions/workflows/links.yml)
 
 Personal reference notes for using the `gws` CLI to interact with Google Workspace APIs.
 
