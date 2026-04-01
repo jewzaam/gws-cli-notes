@@ -2,7 +2,7 @@
 
 ## Authentication
 
-```
+```bash
 gws auth logout
 gws auth login --readonly -s docs,drive,calendar,sheets,slides,meet
 ```
@@ -17,19 +17,20 @@ gws auth login --readonly -s docs,drive,calendar,sheets,slides,meet
 Reading spreadsheets requires `spreadsheets.readonly` scope (added via `-s sheets`).
 
 Use the `+read` helper for simple reads:
-```
+```bash
 gws sheets +read --spreadsheet <SPREADSHEET_ID> --range "Sheet Name" --format table
 ```
 
 To list all tabs in a spreadsheet (find tab names for a given gid):
-```
+```bash
 gws sheets spreadsheets get --params '{"spreadsheetId": "<ID>", "fields": "sheets.properties"}'
 ```
 
 ## Docs Usage
 
 ### Read a Google Doc
-```
+
+```bash
 gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":true}' 2>/dev/null > output.json
 ```
 - `includeTabsContent:true` is required to get all tabs; without it only first tab is in `doc.body.content`
@@ -38,13 +39,14 @@ gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":tru
 - `-o` flag is for binary responses only; use shell redirect for JSON
 
 ### Suggestions
+
 Add `suggestionsViewMode` query param:
 - `SUGGESTIONS_INLINE` (default) - raw doc with `suggestedInsertionIds`/`suggestedDeletionIds` on textRun elements
 - `PREVIEW_SUGGESTIONS_ACCEPTED` - doc as if all suggestions accepted
 - `PREVIEW_WITHOUT_SUGGESTIONS` - doc with all suggestions rejected (original text)
 
 Example:
-```
+```bash
 gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":true,"suggestionsViewMode":"SUGGESTIONS_INLINE"}' 2>/dev/null > output.json
 ```
 
@@ -53,7 +55,8 @@ Finding suggestions in the JSON: look for `suggestedInsertionIds` (new text) and
 ## Slides Usage
 
 ### Read a Presentation
-```
+
+```bash
 gws slides presentations get --params '{"presentationId": "<PRESENTATION_ID>"}' --format json
 ```
 - Presentation ID is the string between `/d/` and `/edit` in the Google Slides URL
@@ -62,7 +65,8 @@ gws slides presentations get --params '{"presentationId": "<PRESENTATION_ID>"}' 
 - Text content is nested: `pageElement.shape.text.textElements[].textRun.content`
 
 ### Export Presentation as PDF
-```
+
+```bash
 gws drive files export --params '{"fileId": "<PRESENTATION_ID>", "mimeType": "application/pdf"}' -o deck.pdf
 ```
 - Google Workspace files (Slides, Docs, Sheets) cannot be downloaded with `files get --alt media` — use `files export` instead
@@ -73,7 +77,8 @@ gws drive files export --params '{"fileId": "<PRESENTATION_ID>", "mimeType": "ap
 - For programmatic text extraction, the Slides API JSON (`presentations get`) gives structured access to text elements, but requires traversing nested `pageElements > shape > text > textElements > textRun > content` and `table > tableRows > tableCells > text` paths — the PDF export + Read is simpler for one-off content extraction
 
 ### Get a Single Slide Page
-```
+
+```bash
 gws slides presentations pages get \
   --params '{"presentationId": "<ID>", "pageObjectId": "<SLIDE_OBJECT_ID>"}'
 ```
@@ -81,8 +86,10 @@ gws slides presentations pages get \
 ## Drive Usage
 
 ### Comments (Docs, Slides, and any Google file)
+
 Comments are accessed via the Drive API, not the Docs or Slides APIs:
-```
+
+```bash
 gws drive comments list \
   --params '{"fileId": "<FILE_ID>", "fields": "comments(id,content,author,createdTime,modifiedTime,resolved,replies,anchor,quotedFileContent)"}'
 ```
@@ -92,23 +99,25 @@ gws drive comments list \
 - `quotedFileContent.value` — the text that was highlighted when the comment was made
 - `replies` — thread replies with author, content, and action (e.g., `resolve`)
 
-```
+```bash
 # Get a single comment
 gws drive comments get --params '{"fileId": "<ID>", "commentId": "<COMMENT_ID>", "fields": "*"}'
 ```
 
 ### List Files in a Folder
-```
+
+```bash
 gws drive files list --params '{"q": "\"<FOLDER_ID>\" in parents", "fields": "files(id,name,mimeType,createdTime,viewedByMeTime)", "orderBy": "createdTime desc", "pageSize": 30}'
 ```
 - `q` uses Drive search query syntax — `"<ID>" in parents` lists a folder's contents
 - `fields` controls which file properties are returned (reduces payload)
 - `viewedByMeTime` is null/absent if the authenticated user has never opened the file — useful for tracking unwatched demos
-- `orderBy` supports: `createdTime`, `modifiedTime`, `name`, `folder` (append ` desc` for descending)
+- `orderBy` supports: `createdTime`, `modifiedTime`, `name`, `folder` (append `desc` for descending)
 - `pageSize` max is 1000; use `nextPageToken` or `--page-all` for pagination
 
 ### Export Google Workspace Files as Text
-```
+
+```bash
 gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "text/plain"}' -o output.txt
 ```
 - Works for Docs, Slides, Sheets — converts to plain text
@@ -117,7 +126,8 @@ gws drive files export --params '{"fileId": "<FILE_ID>", "mimeType": "text/plain
 - See also: PDF export example under Slides Usage
 
 ### File Metadata and Downloads
-```
+
+```bash
 # Get metadata (size, duration, resolution, permissions)
 gws drive files get --params '{"fileId": "<FILE_ID>", "fields": "id,name,mimeType,size,webViewLink,webContentLink,createdTime,videoMediaMetadata,capabilities"}' --format json
 
@@ -130,7 +140,8 @@ gws drive files get --params '{"fileId": "<FILE_ID>", "alt": "media"}' --output 
 - When `canDownload: true`, pipe to ffplay: `gws drive files get --params '{"fileId": "...", "alt": "media"}' 2>/dev/null | ffplay -`
 
 ### Download via `files download`
-```
+
+```bash
 gws drive files download --params '{"fileId": "<FILE_ID>"}' --output recording.webm
 ```
 - Alternative to `files get --params '{"alt": "media"}'` — simpler syntax for binary downloads
@@ -138,6 +149,7 @@ gws drive files download --params '{"fileId": "<FILE_ID>"}' --output recording.w
 - Used by meet-enrich for downloading meeting recordings
 
 ### Download Restrictions (org policy)
+
 When `viewersCanCopyContent: false` / `canDownload: false`:
 - The Drive API refuses to serve bytes regardless of endpoint (`files.get?alt=media` returns 403, `files.download` returns 500)
 - Browser streaming still works because Google's embedded player uses internal infrastructure
@@ -147,7 +159,8 @@ When `viewersCanCopyContent: false` / `canDownload: false`:
 ## Calendar Usage
 
 ### Show Today's Agenda (Quick)
-```
+
+```bash
 gws calendar +agenda --today --format table
 ```
 - Shows events across **all** calendars (PTO, team calendars, personal, etc.)
@@ -155,7 +168,8 @@ gws calendar +agenda --today --format table
 - Other options: `--tomorrow`, `--week`, `--days <N>`
 
 ### List Events on Primary Calendar (Detailed)
-```
+
+```bash
 gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03-20T00:00:00-04:00", "timeMax": "2026-03-21T00:00:00-04:00", "singleEvents": true, "orderBy": "startTime"}' --format json
 ```
 - `singleEvents: true` expands recurring events into individual instances
@@ -163,12 +177,14 @@ gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03
 - Response includes `attendees[]` with `self: true` and `responseStatus` (accepted/declined/tentative/needsAction)
 
 ### Response Status (Accepted / Declined / Tentative)
+
 - **No server-side filter** — the Google Calendar API does not support filtering by response status
 - Must query events and check `attendees[].responseStatus` where `attendees[].self == true` in post-processing
 - Events with no `attendees` array are self-owned (effectively accepted)
 - Possible values: `accepted`, `declined`, `tentative`, `needsAction`
 
 ### Meeting Artifacts from Calendar Events
+
 Calendar events from Google Meet include attachments with meeting artifacts:
 - Attachments are in `event.attachments[]` with `fileId`, `fileUrl`, `mimeType`, `title`
 - Common attachment types:
@@ -176,32 +192,36 @@ Calendar events from Google Meet include attachments with meeting artifacts:
   - `text/plain` — Chat log
   - `application/vnd.google-apps.document` — Notes (human or Gemini-generated), Transcript
 - Gemini notes docs contain: summary, detailed notes with timestamps, suggested next steps, and (if transcription was enabled) **full transcript**
-- Human meeting notes are a separate doc (titled "Notes - <meeting name>") with running notes across meetings in tabs
+- Human meeting notes are a separate doc (titled "Notes - \<meeting name\>") with running notes across meetings in tabs
 - To fetch doc content: `gws docs documents get --params '{"documentId": "<fileId>", "includeTabsContent": true}'`
 - Recording/chat files may return 404 if you don't have access (e.g., declined the meeting)
 - Recordings are owned by the meeting organizer, not attendees
 
 ### Working Location
+
 - Shows as an event with `eventType: workingLocation`
 - Properties in `workingLocationProperties.type`: `homeOffice`, `officeLocation`, `customLocation`
 - All-day event, transparent (doesn't block calendar)
 
 ### Working Hours
+
 - **Not available via Calendar API** — working hours are a UI-only setting in Google Calendar
 - Not exposed in `settings list`, `calendarList get`, or any other endpoint
 
 ### Calendar Settings
-```
+
+```bash
 gws calendar settings list --params '{}' --format json
 ```
 - Returns: timezone, locale, weekStart, format24HourTime, defaultEventLength, showDeclinedEvents, hideWeekends
 
 ## Meet Usage
 
-Requires `-s meet` in auth login and the Meet API enabled on the GCP project (one-time: https://console.developers.google.com/apis/api/meet.googleapis.com/overview).
+Requires `-s meet` in auth login and the Meet API enabled on the GCP project (one-time: <https://console.developers.google.com/apis/api/meet.googleapis.com/overview>).
 
 ### Find a Conference Record
-```
+
+```bash
 gws meet conferenceRecords list --params '{"filter": "space.meeting_code=\"<CODE>\""}' --format json
 ```
 - Meeting code is from the Google Meet URL (e.g., `unp-byke-sps` from `meet.google.com/unp-byke-sps`)
@@ -209,7 +229,8 @@ gws meet conferenceRecords list --params '{"filter": "space.meeting_code=\"<CODE
 - Response includes `name` (e.g., `conferenceRecords/<ID>`), start/end times, expiry (30 days)
 
 ### List Recordings
-```
+
+```bash
 gws meet conferenceRecords recordings list --params '{"parent": "conferenceRecords/<ID>"}' --format json
 ```
 - Returns `driveDestination.file` (Drive file ID) and `driveDestination.exportUri` (view URL)
@@ -217,7 +238,8 @@ gws meet conferenceRecords recordings list --params '{"parent": "conferenceRecor
 - Still subject to Drive download restrictions (`canDownload`, `viewersCanCopyContent`)
 
 ### Transcripts
-```
+
+```bash
 gws meet conferenceRecords transcripts list --params '{"parent": "conferenceRecords/<ID>"}' --format json
 ```
 - Returns `docsDestination.document` (Google Doc ID) and `docsDestination.exportUri`
@@ -226,7 +248,8 @@ gws meet conferenceRecords transcripts list --params '{"parent": "conferenceReco
 - There is no hidden closed-caption or ASR data available after the fact — if transcription wasn't on, no transcript exists anywhere in the API or Drive
 
 ### Structured Transcript Entries
-```
+
+```bash
 gws meet conferenceRecords transcripts entries list \
   --params '{"parent": "conferenceRecords/<ID>/transcripts/<TRANSCRIPT_ID>", "pageSize": 100}' --format json
 ```
@@ -236,7 +259,8 @@ gws meet conferenceRecords transcripts entries list \
 - Entries may differ from the Google Docs transcript
 
 ### Other Meet Resources
-```
+
+```bash
 # List participants (with display names and join/leave times)
 gws meet conferenceRecords participants list --params '{"parent": "conferenceRecords/<ID>"}' --format json
 
@@ -246,7 +270,8 @@ gws meet conferenceRecords participants participantSessions list \
 ```
 
 ### Listing All Meetings a User Attended (Date Range Query)
-```
+
+```bash
 gws meet conferenceRecords list --params '{"filter":"start_time>=\"2026-03-27T00:00:00Z\" AND start_time<=\"2026-03-28T00:00:00Z\"","pageSize":100}' --format json
 ```
 - Returns all conference records the authenticated user has access to within the date range
@@ -258,12 +283,14 @@ gws meet conferenceRecords list --params '{"filter":"start_time>=\"2026-03-27T00
 - Conference records expire after 30 days (`expireTime` field)
 
 ### Meeting Lifecycle Detection
+
 - **Active meeting**: conference record has `startTime` but no `endTime` field
 - **Concluded meeting**: conference record has both `startTime` and `endTime`
 - Check: `"endTime" in record` → concluded, `"endTime" not in record` → still active
 - Use case: avoid summarizing in-progress meetings in automation
 
 ### Artifact Discovery via Meet API
+
 The Meet API provides an alternative to calendar event attachments for discovering recordings and transcripts:
 - `recordings list` returns Drive file IDs and viewable URLs (`driveDestination.exportUri`)
 - `transcripts list` returns Google Doc IDs and edit URLs (`docsDestination.exportUri`)
@@ -273,7 +300,8 @@ The Meet API provides an alternative to calendar event attachments for discoveri
 - The viewable/edit URLs are useful even when download is blocked — store them in metadata for manual access
 
 ### Resolve Space Name to Meeting Code
-```
+
+```bash
 gws meet spaces get --params '{"name": "spaces/<SPACE_ID>"}'
 ```
 - Returns `meetingCode` (the 3-3-3 code like `abc-defg-hij`)
@@ -281,12 +309,14 @@ gws meet spaces get --params '{"name": "spaces/<SPACE_ID>"}'
 - meet-enrich caches these mappings in its database to avoid repeated lookups
 
 ### smartNotes Limitation
+
 The `smartNotes` endpoint returns 403 even with Owner role on the GCP project. The API schema lists `"scopes": []` (no OAuth scopes), indicating it's not available via standard OAuth flows. Likely requires service account with domain-wide delegation or is gated behind Workspace admin APIs. The Gemini notes content is still accessible via the Drive/Docs API using the doc ID from the calendar event attachment.
 
 ## People API Usage
 
 ### Get Person Info
-```
+
+```bash
 gws people people get --params '{"resourceName": "people/<NUMERIC_ID>", "personFields": "names,emailAddresses"}'
 ```
 - `resourceName`: `people/me` for authenticated user, `people/<numeric_id>` for a specific person
@@ -296,7 +326,8 @@ gws people people get --params '{"resourceName": "people/<NUMERIC_ID>", "personF
 - meet-enrich uses this to resolve Meet participant IDs to email addresses and display names
 
 ### Get Authenticated User
-```
+
+```bash
 gws people people get --params '{"resourceName": "people/me", "personFields": "names,emailAddresses"}'
 ```
 - Returns the authenticated user's `resourceName` (e.g., `people/12345`)
@@ -305,7 +336,8 @@ gws people people get --params '{"resourceName": "people/me", "personFields": "n
 ## Auth Status
 
 ### Check Token and Scopes
-```
+
+```bash
 gws auth status
 ```
 - Returns JSON with `user` (email), `scopes`, `expired`, `token_type`
@@ -317,11 +349,13 @@ gws auth status
 Analyzed a Gemini-generated meeting notes doc (two tabs: Notes, Transcript).
 
 ### Tab Structure
+
 - With `includeTabsContent:true`, tabs are in `doc.tabs[]`
 - Each tab: `tabProperties.title`, `tabProperties.tabId`, `documentTab.body.content[]`
 - Without `includeTabsContent`, only the first tab appears in `doc.body.content`
 
 ### Paragraph Styles (namedStyleType)
+
 Only three styles observed in Gemini meeting docs:
 - `HEADING_2` — tab title, section headers
 - `HEADING_3` — subsection headers (e.g., "Summary", "Details", timestamps in transcript)
@@ -330,6 +364,7 @@ Only three styles observed in Gemini meeting docs:
 - No list styles via `namedStyleType`; bullets appear as Unicode characters (e.g., `\ue907`) in text content
 
 ### Element Types (within paragraph.elements[])
+
 - `textRun` — primary content. Has `content` (string) and `textStyle` (bold, strikethrough, link, etc.)
 - `person` — inline @mention. Has `personProperties.name` and `personProperties.email`. Can have `textStyle.strikethrough`
 - `richLink` — smart chip / embedded link. Has `richLinkProperties.title` and `richLinkProperties.uri`
@@ -340,9 +375,10 @@ Only three styles observed in Gemini meeting docs:
 - `inlineObjectElement` — images, not observed here
 
 ### Special Characters in Text Content
+
 - `\x0b` (vertical tab, `U+000B`) — soft line break within a paragraph. Used heavily in transcript tab where multiple speaker turns are in one paragraph. Map to `\n` in markdown.
 - `\xa0` (non-breaking space, `U+00A0`) — appears at start of transcript paragraphs. Strip or normalize to regular space.
-- `\ue907` (private use area) — Gemini's custom bullet icon in summary/detail paragraphs. Map to a markdown list bullet (`- `) or strip.
+- `\ue907` (private use area) — Gemini's custom bullet icon in summary/detail paragraphs. Map to a markdown list bullet (`-`) or strip.
 - `\n` — paragraph-ending newline (always the last char in `textRun.content`)
 
 ### Structural Patterns in Gemini Meeting Docs
@@ -364,12 +400,14 @@ Only three styles observed in Gemini meeting docs:
 4. Multiple speakers in a single paragraph, separated by `\x0b`
 
 ### Text Style Properties (textRun.textStyle)
+
 - `bold` — used for topic headers (Notes) and speaker names (Transcript)
 - `strikethrough` — used on removed attendees (person elements)
 - `link.url` — hyperlinks (check `textStyle.link` for linked text)
 - Other possible styles (not observed here): `italic`, `underline`, `fontSize`, `foregroundColor`, `weightedFontFamily`
 
 ### Markdown Conversion Mapping
+
 | Docs API | Markdown |
 |----------|----------|
 | `HEADING_1` | `#` |
@@ -382,14 +420,15 @@ Only three styles observed in Gemini meeting docs:
 | `person` | `@Name` or `~~@Name~~` if strikethrough |
 | `richLink` | `[title](uri)` |
 | `\x0b` in content | line break (`\n`) |
-| `\ue907` prefix | `- ` (list item) |
+| `\ue907` prefix | `-` (list item) |
 | `sectionBreak` | blank line or `---` |
 | `horizontalRule` | `---` |
 
 ## Gmail Usage
 
 ### Search Messages
-```
+
+```bash
 gws gmail users messages list --params '{"userId": "me", "q": "is:unread newer_than:7d (ANSTRAT OR nexus)", "maxResults": 20}'
 ```
 - `q` uses Gmail search syntax — same operators as the Gmail search bar (`is:unread`, `from:`, `subject:`, `newer_than:`, `OR`, parentheses for grouping)
@@ -397,14 +436,16 @@ gws gmail users messages list --params '{"userId": "me", "q": "is:unread newer_t
 - `maxResults` max is 500; use `nextPageToken` for pagination
 
 ### Get Message Headers (Metadata Only)
-```
+
+```bash
 gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>", "format": "metadata", "metadataHeaders": ["Subject", "Date", "From", "To", "Cc"]}'
 ```
 - `format: "metadata"` returns only headers specified in `metadataHeaders` — lightweight
 - Headers are in `payload.headers[]` as `{name, value}` pairs
 
 ### Get Full Message Content
-```
+
+```bash
 gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>", "format": "full"}'
 ```
 - Returns full MIME structure including body content
@@ -412,7 +453,8 @@ gws gmail users messages get --params '{"userId": "me", "id": "<MESSAGE_ID>", "f
 - `format` options: `minimal` (IDs only), `metadata` (headers), `full` (everything), `raw` (RFC 2822)
 
 ### Read Helper (Shortcut)
-```
+
+```bash
 gws gmail +read --id <MESSAGE_ID> --headers --format json
 ```
 - Convenience wrapper — `--headers` returns just headers without the full MIME payload
@@ -437,7 +479,7 @@ gws gmail +read --id <MESSAGE_ID> --headers --format json
 
 The PA dashboard requires `calendar.events` (write) for RSVP. The `-s calendar` flag only grants `calendar.readonly`. To get both read and write, use explicit `--scopes`:
 
-```
+```bash
 gws auth logout
 gws auth login --scopes https://www.googleapis.com/auth/calendar.events,https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/documents.readonly,https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/meetings.space.readonly,https://www.googleapis.com/auth/presentations.readonly,https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/directory.readonly
 ```
