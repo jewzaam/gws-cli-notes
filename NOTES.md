@@ -160,6 +160,44 @@ When `viewersCanCopyContent: false` / `canDownload: false`:
 - No public API provides an alternative streaming URL
 - Only the file owner or a Drive admin can change this
 
+## Pagination
+
+Most Google API `list` endpoints return a maximum number of results per page (e.g., Calendar events default to 250, Drive files default to 100). When more results exist, the response includes a `nextPageToken` field.
+
+### Manual Pagination
+
+Pass `pageToken` in subsequent requests:
+
+```python
+all_items = []
+page_token = None
+while True:
+    params = {<base params>}
+    if page_token:
+        params["pageToken"] = page_token
+    response = run_gws(..., params=params)
+    all_items.extend(response.get("items", []))
+    page_token = response.get("nextPageToken")
+    if not page_token:
+        break
+```
+
+### `--page-all` Flag
+
+Some `gws` commands support `--page-all` to automatically fetch all pages. Check if available before relying on it — not all endpoints support it.
+
+### Known Page Size Defaults
+
+| API | Endpoint | Default `maxResults` / `pageSize` |
+|-----|----------|----------------------------------|
+| Calendar | `events list` | 250 |
+| Drive | `files list` | 100 (max 1000) |
+| Gmail | `messages list` | 100 (max 500) |
+| Meet | `conferenceRecords list` | 25 |
+| Meet | `transcripts entries list` | 100 |
+
+**Gotcha**: Getting exactly the default page size back (e.g., 250 calendar events) is a strong signal that results were truncated. Always paginate `list` calls in production code.
+
 ## Calendar Usage
 
 ### Show Today's Agenda (Quick)
@@ -179,6 +217,7 @@ gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03
 - `singleEvents: true` expands recurring events into individual instances
 - `orderBy: startTime` requires `singleEvents: true`
 - Response includes `attendees[]` with `self: true` and `responseStatus` (accepted/declined/tentative/needsAction)
+- **Paginated** — defaults to 250 results max. A busy shared calendar over 30 days will hit this limit. Must follow `nextPageToken` to get all events (see Pagination section)
 
 ### Response Status (Accepted / Declined / Tentative)
 
