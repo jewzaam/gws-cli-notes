@@ -5,7 +5,7 @@ Usage notes for the `gws` CLI organized by service. General topics are inline be
 ## Services
 
 - [Calendar](docs/calendar.md) — agenda, events, RSVP, meeting artifacts, working location
-- [Docs](docs/docs.md) — read documents, suggestions
+- [Docs](docs/docs.md) — read documents, suggestions, write (batchUpdate, tabs, text)
 - [Docs API Content Structure](docs/docs-api-content-structure.md) — JSON structure, element types, markdown conversion mapping
 - [Drive](docs/drive.md) — comments, file listing, export, downloads, org-policy restrictions
 - [Gmail](docs/gmail.md) — search, message headers, full content
@@ -30,6 +30,26 @@ gws auth login --readonly -s docs,drive,calendar,sheets,slides,meet
 - API enablement errors include URLs to enable the API on the GCP project (one-time action per API)
 - The `--format` flag is available on all commands: json (default), table, yaml, csv
 
+## Schema Lookup
+
+Inspect the Google API discovery schema for any service, resource, or method — read-only, no auth required, no API calls to user data.
+
+```bash
+gws schema <service.resource.method> [--resolve-refs]
+```
+
+Examples:
+```bash
+gws schema drive.files.list
+gws schema calendar.events.list
+gws schema meet.conferenceRecords.participants
+```
+
+- Path must be at least `service.Message` or `service.resource.method`
+- Returns parameter names, types, descriptions, required/optional, enum values
+- `--resolve-refs` inlines referenced schema types instead of showing `$ref` pointers
+- Useful for discovering available query parameters, field names, and filter syntax without reading Google's web docs
+
 ## Auth Status
 
 ### Check Token and Scopes
@@ -49,6 +69,7 @@ gws auth status
 | Calendar | Read events, settings | `https://www.googleapis.com/auth/calendar.readonly` | `-s calendar` |
 | Calendar | RSVP / patch events (PA dashboard) | `https://www.googleapis.com/auth/calendar.events` | requires `--scopes` (see below) |
 | Docs | Read content, suggestions | `https://www.googleapis.com/auth/documents.readonly` | `-s docs` |
+| Docs | Write (batchUpdate: insert text, add/delete tabs, style) | `https://www.googleapis.com/auth/documents` | requires `--scopes` |
 | Drive | Comments, file metadata, downloads | `https://www.googleapis.com/auth/drive.readonly` | `-s drive` |
 | Slides | Read presentations | `https://www.googleapis.com/auth/presentations.readonly` | `-s slides` |
 | Sheets | Read spreadsheets | `https://www.googleapis.com/auth/spreadsheets.readonly` | `-s sheets` |
