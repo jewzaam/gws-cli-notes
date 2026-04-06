@@ -16,6 +16,26 @@ gws auth login --readonly -s docs,drive,calendar,sheets,slides,meet
 - API enablement errors include URLs to enable the API on the GCP project (one-time action per API)
 - The `--format` flag is available on all commands: json (default), table, yaml, csv
 
+## Schema Lookup
+
+Inspect the Google API discovery schema for any service, resource, or method — read-only, no auth required, no API calls to user data.
+
+```bash
+gws schema <service.resource.method> [--resolve-refs]
+```
+
+Examples:
+```bash
+gws schema drive.files.list
+gws schema calendar.events.list
+gws schema meet.conferenceRecords.participants
+```
+
+- Path must be at least `service.Message` or `service.resource.method`
+- Returns parameter names, types, descriptions, required/optional, enum values
+- `--resolve-refs` inlines referenced schema types instead of showing `$ref` pointers
+- Useful for discovering available query parameters, field names, and filter syntax without reading Google's web docs
+
 ## Sheets Usage
 
 Reading spreadsheets requires `spreadsheets.readonly` scope (added via `-s sheets`).
@@ -55,6 +75,44 @@ gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":tru
 ```
 
 Finding suggestions in the JSON: look for `suggestedInsertionIds` (new text) and `suggestedDeletionIds` (removed text) on `textRun` elements. Same suggestion ID on an insertion and deletion = a replacement.
+
+### Write to a Google Doc (batchUpdate)
+
+Requires `https://www.googleapis.com/auth/documents` scope (not `documents.readonly`).
+
+```bash
+gws docs documents batchUpdate --params '{"documentId":"DOC_ID"}' --json '{"requests":[...]}'
+```
+- `--params` carries URL/path parameters (`documentId`)
+- `--json` carries the request body (`requests` array) — do NOT use `--body` (not supported)
+- Scopes: `documents`, `drive`, or `drive.file`
+- Each request in the array is validated before any are applied; if one fails, none are applied
+
+### Add a Tab
+
+```bash
+gws docs documents batchUpdate --params '{"documentId":"DOC_ID"}' --json '{"requests":[{"addDocumentTab":{"tabProperties":{"title":"My Tab"}}}]}'
+```
+- Response includes `replies[0].addDocumentTab.tabProperties.tabId` — the new tab's ID
+- For child tabs, add `"parentTabId":"PARENT_TAB_ID"` to `tabProperties`
+- `tabProperties.index` controls position within the parent (zero-based)
+- **Tab title max length is 50 characters** — API returns 400 if exceeded
+
+### Insert Text into a Tab
+
+```bash
+gws docs documents batchUpdate --params '{"documentId":"DOC_ID"}' --json '{"requests":[{"insertText":{"endOfSegmentLocation":{"tabId":"TAB_ID"},"text":"Hello world"}}]}'
+```
+- `endOfSegmentLocation.tabId` targets a specific tab; omit `tabId` for the first tab
+- `insertText` inserts **plain text only** — markdown syntax (`# heading`, `**bold**`) is inserted as literal characters, not converted to formatting
+- To apply formatting, use separate `updateParagraphStyle` and `updateTextStyle` requests with index ranges targeting the same `tabId`
+- New tabs start with a section break (index 0–1) and a trailing newline; inserted text starts at index 1
+
+### Delete a Tab
+
+```bash
+gws docs documents batchUpdate --params '{"documentId":"DOC_ID"}' --json '{"requests":[{"deleteTab":{"tabId":"TAB_ID"}}]}'
+```
 
 ## Slides Usage
 
@@ -509,6 +567,7 @@ gws gmail +read --id <MESSAGE_ID> --headers --format json
 | Calendar | Read events, settings | `https://www.googleapis.com/auth/calendar.readonly` | `-s calendar` |
 | Calendar | RSVP / patch events (PA dashboard) | `https://www.googleapis.com/auth/calendar.events` | requires `--scopes` (see below) |
 | Docs | Read content, suggestions | `https://www.googleapis.com/auth/documents.readonly` | `-s docs` |
+| Docs | Write (batchUpdate: insert text, add/delete tabs, style) | `https://www.googleapis.com/auth/documents` | requires `--scopes` |
 | Drive | Comments, file metadata, downloads | `https://www.googleapis.com/auth/drive.readonly` | `-s drive` |
 | Slides | Read presentations | `https://www.googleapis.com/auth/presentations.readonly` | `-s slides` |
 | Sheets | Read spreadsheets | `https://www.googleapis.com/auth/spreadsheets.readonly` | `-s sheets` |
