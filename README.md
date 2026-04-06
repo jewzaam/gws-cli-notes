@@ -4,17 +4,20 @@
 
 Personal reference notes for using the `gws` CLI to interact with Google Workspace APIs.
 
-## Overview
+## Structure
 
-A collection of usage notes, patterns, and gotchas discovered while working with `gws` across Google Workspace services:
-
-- Authentication and scope management
-- Docs, Sheets, Slides — reading content, handling suggestions, exporting
-- Drive — comments, file metadata, downloads, org-policy restrictions
-- Calendar — agenda queries, event filtering, meeting artifacts
-- Meet — conference records, recordings, transcripts, participants
-- Docs API content structure and markdown conversion mapping
+- [NOTES.md](NOTES.md) — index with general topics (auth, scopes, pagination) and links to per-service docs
+- [docs/](docs/) — per-service usage notes:
+  - [Calendar](docs/calendar.md) — agenda, events, RSVP, meeting artifacts
+  - [Docs](docs/docs.md) — read documents, suggestions
+  - [Docs API Content Structure](docs/docs-api-content-structure.md) — JSON structure, markdown conversion
+  - [Drive](docs/drive.md) — comments, file listing, export, downloads
+  - [Gmail](docs/gmail.md) — search, message headers, full content
+  - [Meet](docs/meet.md) — conference records, recordings, transcripts, participants
+  - [People API](docs/people.md) — resolve user IDs
+  - [Sheets](docs/sheets.md) — read spreadsheets, cell formatting
+  - [Slides](docs/slides.md) — read presentations, PDF export
 
 ## Usage
 
-[NOTES.md](NOTES.md) is the primary artifact — structured for AI assistant consumption (e.g., referenced from CLAUDE.md) so that tools like Claude Code can use `gws` commands effectively without rediscovering API quirks, scope requirements, and response structure.
+Structured for AI assistant consumption (e.g., referenced from CLAUDE.md) so that tools like Claude Code can use `gws` commands effectively without rediscovering API quirks, scope requirements, and response structure.
