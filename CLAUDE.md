@@ -23,7 +23,7 @@ Reference notes for using the `gws` CLI with Google Workspace APIs. Per-service 
 
 ## GCP Project Setup
 
-Create a new GCP project (e.g., under "Default Projects" in the org). Do not reuse an existing project. Then run `gws auth setup` which walks through OAuth consent screen and client credential creation. APIs are enabled on-demand (first call to a service prompts with an enablement URL).
+Create a new GCP project (e.g., under "Default Projects" in the org). Do not reuse an existing project. Then run `gws auth setup` (requires `gcloud` CLI) which walks through OAuth consent screen and client credential creation. APIs are enabled on-demand (first call to a service prompts with an enablement URL).
 
 ## Authentication
 
@@ -64,7 +64,7 @@ gws schema meet.conferenceRecords.participants
 gws auth status
 ```
 
-- Returns JSON with `user` (email), `scopes`, `expired`, `token_type`
+- Returns JSON with `user` (email), `scopes`, `token_valid` (boolean), `scope_count`, `storage`, `enabled_apis`, and more
 - Useful for programmatic checks — meet-enrich uses this to resolve the authenticated user's email
 - No `--params` or `--format` needed
 

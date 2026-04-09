@@ -15,7 +15,8 @@ gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":tru
 
 Add `suggestionsViewMode` query param:
 
-- `SUGGESTIONS_INLINE` (default) - raw doc with `suggestedInsertionIds`/`suggestedDeletionIds` on textRun elements
+- `DEFAULT_FOR_CURRENT_ACCESS` (default) - resolves to `SUGGESTIONS_INLINE` for edit access, may differ for view-only
+- `SUGGESTIONS_INLINE` - raw doc with `suggestedInsertionIds`/`suggestedDeletionIds` on textRun elements
 - `PREVIEW_SUGGESTIONS_ACCEPTED` - doc as if all suggestions accepted
 - `PREVIEW_WITHOUT_SUGGESTIONS` - doc with all suggestions rejected (original text)
 

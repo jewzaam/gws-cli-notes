@@ -39,6 +39,7 @@ gws gmail +read --id <MESSAGE_ID> --headers --format json
 - JSON output includes: `thread_id`, `message_id`, `references`, `from` (name+email), `to`, `cc`, `subject`, `date`, `body_text`, `body_html`
 - Handles multipart/alternative and base64 decoding automatically
 - Converts HTML-only messages to plain text
+- `--html` returns the HTML body instead of plain text
 
 ## Triage Helper (Bulk Metadata)
 
