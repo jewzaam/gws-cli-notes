@@ -6,13 +6,13 @@ Personal reference notes for using the `gws` CLI to interact with Google Workspa
 
 ## Structure
 
-- [NOTES.md](NOTES.md) — index with general topics (auth, scopes, pagination) and links to per-service docs
+- [CLAUDE.md](CLAUDE.md) — comprehensive index with general topics (auth, scopes, pagination) and links to per-service docs
 - [docs/](docs/) — per-service usage notes:
   - [Calendar](docs/calendar.md) — agenda, events, RSVP, meeting artifacts
   - [Docs](docs/docs.md) — read documents, suggestions
   - [Docs API Content Structure](docs/docs-api-content-structure.md) — JSON structure, markdown conversion
   - [Drive](docs/drive.md) — comments, file listing, export, downloads
-  - [Gmail](docs/gmail.md) — search, message headers, full content
+  - [Gmail](docs/gmail.md) — search, message headers, full content, triage (bulk metadata), format comparison
   - [Meet](docs/meet.md) — conference records, recordings, transcripts, participants
   - [People API](docs/people.md) — resolve user IDs
   - [Sheets](docs/sheets.md) — read spreadsheets, cell formatting

@@ -19,7 +19,7 @@ gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03
 - `singleEvents: true` expands recurring events into individual instances
 - `orderBy: startTime` requires `singleEvents: true`
 - Response includes `attendees[]` with `self: true` and `responseStatus` (accepted/declined/tentative/needsAction)
-- **Paginated** — defaults to 250 results max. A busy shared calendar over 30 days will hit this limit. Must follow `nextPageToken` to get all events (see [Pagination](../NOTES.md#pagination))
+- **Paginated** — defaults to 250 results max. A busy shared calendar over 30 days will hit this limit. Must follow `nextPageToken` to get all events (see [Pagination](../CLAUDE.md#pagination))
 
 ## Response Status (Accepted / Declined / Tentative)
 
