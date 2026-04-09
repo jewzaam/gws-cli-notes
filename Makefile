@@ -18,7 +18,7 @@ links:  ## Validate local markdown links and anchors
 
 reachability:  ## Verify all files are reachable from entry points
 	@echo "Checking document reachability..."
-	$(PYTHON) scripts/analyze_depth.py --check
+	$(PYTHON) scripts/reachability.py --check
 
 help:  ## Show available targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
