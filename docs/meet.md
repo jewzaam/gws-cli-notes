@@ -98,6 +98,29 @@ gws meet spaces get --params '{"name": "spaces/<SPACE_ID>"}'
 - Useful when a conference record references a space but not a meeting code directly
 - meet-enrich caches these mappings in its database to avoid repeated lookups
 
+## Recurring Meetings and Conference Records
+
+Recurring calendar events reuse the same Google Meet meeting code across all instances. A daily standup at `meet.google.com/abc-defg-hij` creates a new conference record each day, but querying `space.meeting_code="abc-defg-hij"` returns ALL of them — potentially hundreds.
+
+**Pitfall: attendance check against wrong instance.** If you query conference records by meeting code and check participants to determine whether the user attended, you must filter records by time to match the specific calendar event instance. Without time filtering, attendance from yesterday's standup will match today's query.
+
+```python
+# WRONG — matches attendance from any past instance
+records = list_conference_records(meeting_code)
+for rec in records:
+    if user_in_participants(rec):
+        return True  # false positive: user attended yesterday, not today
+
+# CORRECT — filter to records that started during this event's window
+event_start = parse(calendar_event["start"])
+for rec in records:
+    conf_start = parse(rec.get("startTime", ""))
+    if conf_start >= event_start and user_in_participants(rec):
+        return True
+```
+
+The conference record `startTime` is when participants first joined, not when the calendar event was scheduled. For a 9:15 AM meeting, the conference might start at 9:14 or 9:16. Filter using `>=` against the calendar event start — the conference for today's instance will always start at or after the event's scheduled time.
+
 ## smartNotes Limitation
 
 The `smartNotes` endpoint returns 403 even with Owner role on the GCP project. The API schema lists `"scopes": []` (no OAuth scopes), indicating it's not available via standard OAuth flows. Likely requires service account with domain-wide delegation or is gated behind Workspace admin APIs. The Gemini notes content is still accessible via the Drive/Docs API using the doc ID from the calendar event attachment.

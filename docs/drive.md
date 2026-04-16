@@ -1,5 +1,23 @@
 # Drive
 
+## Create / Upload Files
+
+Requires `https://www.googleapis.com/auth/drive` scope.
+
+```bash
+# Upload HTML and convert to Google Doc
+gws drive files create \
+  --json '{"name":"My Doc","mimeType":"application/vnd.google-apps.document"}' \
+  --upload file.html \
+  --upload-content-type text/html
+```
+
+- `--json` carries file metadata (name, mimeType, parent folder)
+- `--upload` is the local file path
+- `--upload-content-type` is the source MIME type
+- Setting `mimeType` to a Google type (e.g., `application/vnd.google-apps.document`) triggers conversion
+- Creates a new file each time — use `files update` to replace content of existing files (but conversion only works on create, not update)
+
 ## Comments (Docs, Slides, and any Google file)
 
 Comments are accessed via the Drive API, not the Docs or Slides APIs:
