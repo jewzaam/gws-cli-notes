@@ -111,15 +111,16 @@ for rec in records:
     if user_in_participants(rec):
         return True  # false positive: user attended yesterday, not today
 
-# CORRECT — filter to records that started during this event's window
+# CORRECT — filter to records within 30min before event start
 event_start = parse(calendar_event["start"])
+window_start = event_start - timedelta(minutes=30)
 for rec in records:
     conf_start = parse(rec.get("startTime", ""))
-    if conf_start >= event_start and user_in_participants(rec):
+    if conf_start >= window_start and user_in_participants(rec):
         return True
 ```
 
-The conference record `startTime` is when participants first joined, not when the calendar event was scheduled. For a 9:15 AM meeting, the conference might start at 9:14 or 9:16. Filter using `>=` against the calendar event start — the conference for today's instance will always start at or after the event's scheduled time.
+The conference record `startTime` is when the first participant joined, not when the calendar event was scheduled. People often join early — for a 9:15 AM meeting, the conference might start at 9:10. A 30-minute buffer before the event start catches early joiners while still excluding yesterday's recurring instance (which is 24 hours away).
 
 ## smartNotes Limitation
 
