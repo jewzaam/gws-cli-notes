@@ -19,6 +19,7 @@ gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03
 - `singleEvents: true` expands recurring events into individual instances
 - `orderBy: startTime` requires `singleEvents: true`
 - Response includes `attendees[]` with `self: true` and `responseStatus` (accepted/declined/tentative/needsAction)
+- **Group calendar gotcha**: `events list` strips `attendees[]` from events queried via group/shared calendars. To get full attendee data, follow up with `events get` on each event ID. Use [`scripts/calendar-brief.py`](../scripts/calendar-brief.py) to fetch a day's events with full attendee data intact
 - **Paginated** — defaults to 250 results max. A busy shared calendar over 30 days will hit this limit. Must follow `nextPageToken` to get all events (see [Pagination](../CLAUDE.md#pagination))
 
 ## Response Status (Accepted / Declined / Tentative)
@@ -27,6 +28,7 @@ gws calendar events list --params '{"calendarId": "primary", "timeMin": "2026-03
 - Must query events and check `attendees[].responseStatus` where `attendees[].self == true` in post-processing
 - Events with no `attendees` array are self-owned (effectively accepted)
 - Possible values: `accepted`, `declined`, `tentative`, `needsAction`
+- Use [`scripts/fetch-meeting-status.py`](../scripts/fetch-meeting-status.py) to get a quick status table (`--today`, `--tomorrow`, `--json`)
 
 ## Meeting Artifacts from Calendar Events
 
