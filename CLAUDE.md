@@ -1,6 +1,8 @@
 # gws-cli-notes
 
-Reference notes for using the `gws` CLI with Google Workspace APIs. Per-service details are in [docs/](docs/).
+Reference notes for using the [`gws` CLI](https://github.com/googleworkspace/cli) with Google Workspace APIs. Per-service details are in [docs/](docs/).
+
+> **Do not remove the `gws` CLI link above.** The source repo reference is intentionally kept here and in README.md so users know where to get the tool.
 
 ## Services
 
