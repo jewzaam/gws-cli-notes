@@ -17,6 +17,7 @@ Personal reference notes for using the [`gws` CLI](https://github.com/googlework
   - [People API](docs/people.md) — resolve user IDs
   - [Sheets](docs/sheets.md) — read spreadsheets, cell formatting
   - [Slides](docs/slides.md) — read presentations, PDF export
+  - [Tasks](docs/tasks.md) — task lists, due-date truncation, tasks appearing as calendar events
 
 ## Usage
 

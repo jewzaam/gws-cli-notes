@@ -15,6 +15,7 @@ Reference notes for using the [`gws` CLI](https://github.com/googleworkspace/cli
 - [People API](docs/people.md) — resolve user IDs, get authenticated user
 - [Sheets](docs/sheets.md) — read spreadsheets, list tabs, cell formatting/colors
 - [Slides](docs/slides.md) — read presentations, PDF export
+- [Tasks](docs/tasks.md) — task lists, `due` date-only truncation, tasks surfacing as calendar events
 
 ## Key patterns
 
@@ -83,6 +84,8 @@ gws auth status
 | Sheets | Read spreadsheets | `https://www.googleapis.com/auth/spreadsheets.readonly` | `-s sheets` |
 | Meet | Conference records, recordings, transcripts, participants | `https://www.googleapis.com/auth/meetings.space.readonly` | `-s meet` |
 | Gmail | Read messages | `https://www.googleapis.com/auth/gmail.readonly` | `-s gmail` |
+| Tasks | List task lists and tasks | `https://www.googleapis.com/auth/tasks.readonly` | requires `--scopes` (`-s tasks` untested) |
+| Tasks | Create / patch / delete tasks | `https://www.googleapis.com/auth/tasks` | requires `--scopes` |
 | People | Get self (`people/me`) | `https://www.googleapis.com/auth/userinfo.profile` | auto-included |
 | People | Resolve other users (`people/<id>`) | `https://www.googleapis.com/auth/directory.readonly` | requires `--scopes` |
 | Meet | Smart notes | unavailable via OAuth | n/a |
@@ -135,5 +138,6 @@ Some `gws` commands support `--page-all` to automatically fetch all pages. Check
 | Gmail | `messages list` | 100 (max 500) |
 | Meet | `conferenceRecords list` | 25 |
 | Meet | `transcripts entries list` | 100 |
+| Tasks | `tasks list` | 20 (max 100) |
 
 **Gotcha**: Getting exactly the default page size back (e.g., 250 calendar events) is a strong signal that results were truncated. Always paginate `list` calls in production code.
