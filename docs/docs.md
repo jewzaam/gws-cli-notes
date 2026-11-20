@@ -10,7 +10,9 @@ gws docs documents get --params '{"documentId":"DOC_ID","includeTabsContent":tru
 - With it, content is in `doc.tabs[N].documentTab.body.content`
 - Document ID is the string between `/d/` and `/edit` in the Google Docs URL
 - `-o` flag is for binary responses only; use shell redirect for JSON
-- **Tab utilities**: use [`scripts/gdoc-list-tabs.py`](../scripts/gdoc-list-tabs.py) to discover tab IDs, then [`scripts/gdoc-get-tab.py`](../scripts/gdoc-get-tab.py) to extract a single tab as plain text (handles headings, bullets, person mentions, rich links)
+- **Tab utilities**: use [`scripts/gdoc-list-tabs.py`](../scripts/gdoc-list-tabs.py) to discover tab IDs, then [`scripts/gdoc-get-tab.py`](../scripts/gdoc-get-tab.py) to extract a single tab as Markdown (handles headings, bullets, person mentions, rich links, pipe tables). Tab argument accepts a tab ID or a tab title (case-insensitive).
+- Tables come back as Markdown pipe tables. Cell text escapes `|` and joins paragraphs with `<br>`. The first row is treated as the header row — Docs has no header concept, so verify tables whose first row is data.
+- Code blocks still come back as plain paragraphs; Docs stores them as styled text, not structural elements.
 
 ## Suggestions
 

@@ -4,10 +4,11 @@
 #
 # Extract a single tab's content from a Google Doc as plain text.
 #
-# Usage: gdoc-get-tab.py <document_id> <tab_id>
+# Usage: gdoc-get-tab.py <document_id> <tab_id_or_title>
 #
 # Fetches the full doc (Docs API doesn't support single-tab fetch),
-# finds the matching tab by ID, and converts its content to plain text.
+# finds the matching tab by ID or title (case-insensitive), and converts
+# its content to Markdown (headings, bullets, pipe tables).
 # Requires: gws CLI with docs scope
 
 import json
@@ -42,6 +43,8 @@ def find_tab(tabs: list, tab_id: str) -> dict | None:
         props = tab.get("tabProperties", {})
         if props.get("tabId") == tab_id:
             return tab
+        if props.get("title", "").lower() == tab_id.lower():
+            return tab
         children = tab.get("childTabs", [])
         found = find_tab(children, tab_id)
         if found:
@@ -49,10 +52,37 @@ def find_tab(tabs: list, tab_id: str) -> dict | None:
     return None
 
 
+def render_table(table: dict) -> list[str]:
+    """Render a Docs API table element as a Markdown pipe table.
+
+    First row is emitted as the header row. Multi-paragraph cells join with
+    <br>; pipe characters are escaped.
+    """
+    rows = table.get("tableRows", [])
+    if not rows:
+        return []
+
+    lines = []
+    for row_index, row in enumerate(rows):
+        cells = []
+        for cell in row.get("tableCells", []):
+            cell_text = extract_text(cell.get("content", [])).strip()
+            cell_text = cell_text.replace("|", "\\|").replace("\n", "<br>")
+            cells.append(cell_text)
+        lines.append("| " + " | ".join(cells) + " |")
+        if row_index == 0:
+            lines.append("|" + "|".join(" --- " for _ in cells) + "|")
+    return lines
+
+
 def extract_text(content: list) -> str:
     """Convert Google Docs body content to plain text with bullet indentation."""
     lines = []
     for element in content:
+        if "table" in element:
+            lines.extend(render_table(element["table"]))
+            lines.append("")
+            continue
         if "paragraph" not in element:
             continue
         para = element["paragraph"]
@@ -103,7 +133,7 @@ def extract_text(content: list) -> str:
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: gdoc-get-tab.py <document_id> <tab_id>")
+        print("Usage: gdoc-get-tab.py <document_id> <tab_id_or_title>")
         sys.exit(1)
 
     doc_id = sys.argv[1]
